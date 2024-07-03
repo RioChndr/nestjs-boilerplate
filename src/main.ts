@@ -18,7 +18,7 @@ async function bootstrap() {
     }),
   );
 
-  if (process.env.SWAGGER_ENABLED === 'true') {
+  if (process.env.NODE_ENV !== 'production' && process.env.SWAGGER_ENABLED === 'true') {
     initSwagger(app)
   }
 
