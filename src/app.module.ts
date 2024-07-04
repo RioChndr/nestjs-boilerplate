@@ -3,6 +3,7 @@ import { ConfigModule } from '@nestjs/config';
 import { ApiModule } from './api/api.module';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
+import { PrismaModule } from './provider/prisma/prisma.module';
 
 @Module({
   imports: [
@@ -50,7 +51,8 @@ import { LoggerModule } from 'nestjs-pino';
         CORS_ORIGIN_WHITELIST: Joi.string().default('http://localhost:3000')
       })
     }),
-    ApiModule
+    ApiModule,
+    PrismaModule
   ],
   controllers: [],
   providers: [],
