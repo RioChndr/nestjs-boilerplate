@@ -49,7 +49,11 @@ export class AuthService {
     }, {
       jwtid: sessionId,
     })
-    await this.cacheManager.set(`authz:session:${sessionId}`, user.id, 60 * 60)
+
+    // this cache can be used to validate the session if you want
+    // but for now, we just use it to store the user id
+    const keyCache = `authz:session:${sessionId}`;
+    await this.cacheManager.set(keyCache, user.id, 60 * 60)
 
     const refreshToken = this.jwtService.sign({
       ...payload,
@@ -70,9 +74,7 @@ export class AuthService {
   async refreshToken(req: { headers: { authorization: string } }) {
     const refreshToken = req.headers.authorization.split(' ')[1];
 
-    const payload = this.jwtService.verify(refreshToken, {
-      issuer: process.env.JWT_ISSUER,
-    }) as { sub: number, jti: string, email: string, typ: string };
+    const payload = this.jwtService.verify(refreshToken) as { sub: number, jti: string, email: string, typ: string };
 
     const keyCache = `authz:refresh:${payload.jti}`;
 
@@ -86,23 +88,22 @@ export class AuthService {
     return this.login({ id: payload.sub, email: payload.email } as User);
   }
 
+  /**
+   * you can add more logic here to validate the session
+   * @param payloadJwt 
+   * @returns 
+   */
   async validateSession(payloadJwt: { sub: number, jti: string, email: string, typ: string }) {
-    this.logger.log(payloadJwt)
-    const keyCache = `authz:session:${payloadJwt.jti}`;
-    const cacheValue = await this.cacheManager.get(keyCache);
-    this.logger.log({
-      "msg": "debug cache",
-      keyCache,
-      cacheValue,
-    })
     if (
-      payloadJwt.typ !== 'access' ||
-      await this.cacheManager.get(keyCache) !== payloadJwt.sub
+      payloadJwt.typ !== 'access'
     ) {
       throw new UnauthorizedException('Access token is invalid or expired');
     }
 
-    return payloadJwt
+    return {
+      id: payloadJwt.sub,
+      email: payloadJwt.email,
+    }
   }
 
 

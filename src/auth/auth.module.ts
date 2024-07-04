@@ -10,7 +10,10 @@ import { JwtStrategy } from './strategy/jwt.strategy';
   imports: [
     JwtModule.register({
       secret: process.env.JWT_SECRET,
-      signOptions: { expiresIn: '1h', issuer: process.env.JWT_ISSUER || 'nestjs-auth' }
+      signOptions: { expiresIn: '1h', issuer: process.env.JWT_ISSUER || 'nestjs-auth' },
+      verifyOptions: {
+        issuer: process.env.JWT_ISSUER || 'nestjs-auth',
+      }
     })
   ],
   controllers: [AuthController],
