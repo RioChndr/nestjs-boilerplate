@@ -5,6 +5,7 @@ import { initSwagger } from './swagger';
 import { CorsConfig } from './cors';
 import { Logger, LoggerErrorInterceptor } from 'nestjs-pino';
 import { ValidationPipe, Logger as LoggerNest } from '@nestjs/common';
+import * as session from 'express-session';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -17,6 +18,17 @@ async function bootstrap() {
       transform: true,
     }),
   );
+  app.use(
+    session({
+      secret: process.env.SESSION_SECRET,
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: process.env.NODE_ENV === 'production',
+        maxAge: 1000 * 60 * 60 * 24 * 7,
+      },
+    })
+  )
 
   if (process.env.SWAGGER_ENABLED === 'true') {
     initSwagger(app)

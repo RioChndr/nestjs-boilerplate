@@ -1,4 +1,4 @@
-import { Inject, Injectable, Logger, NotImplementedException, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, Inject, Injectable, Logger, NotImplementedException, UnauthorizedException } from '@nestjs/common';
 import { User } from '@prisma/client';
 import { UserService } from './user/user.service';
 import * as bcrypt from 'bcrypt';
@@ -107,8 +107,11 @@ export class AuthService {
   }
 
 
-  callbackOAuthGoogle(props: { accessToken: string, refreshToken: string, profile: any, done: any }) {
-    // TODO : implement the logic here
-    throw new NotImplementedException();
+  async callbackOAuthGoogle(props: { accessToken: string, refreshToken: string, profile: any }) {
+    const user = await this.userService.findUserByEmail(props.profile.emails[0].value);
+    if (!user) {
+      throw new BadRequestException('User not found')
+    }
+    return user;
   }
 }

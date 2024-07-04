@@ -18,4 +18,16 @@ export class AuthController {
   refreshToken(@Request() req) {
     return this.authService.refreshToken(req);
   }
+
+  @UseGuards(AuthGuard('google'))
+  @Get('google')
+  async googleAuth() {
+    return 'Google Auth';
+  }
+
+  @UseGuards(AuthGuard('google'))
+  @Get('google/callback')
+  async googleAuthCallback(@Request() req) {
+    return this.authService.login(req.user);
+  }
 }
