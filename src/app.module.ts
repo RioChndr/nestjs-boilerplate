@@ -4,9 +4,14 @@ import { ApiModule } from './api/api.module';
 import * as Joi from 'joi';
 import { LoggerModule } from 'nestjs-pino';
 import { PrismaModule } from './provider/prisma/prisma.module';
+import { AuthModule } from './auth/auth.module';
+import { CacheModule } from '@nestjs/cache-manager';
 
 @Module({
   imports: [
+    CacheModule.register({
+      isGlobal: true,
+    }),
     LoggerModule.forRoot({
       pinoHttp: {
         name: 'Nestjs',
@@ -48,11 +53,14 @@ import { PrismaModule } from './provider/prisma/prisma.module';
         SWAGGER_ENABLED: Joi.boolean().default(false),
         SWAGGER_SERVER_URL: Joi.string().default('http://localhost:3000|Localhost'),
         SWAGGER_URL: Joi.string().default('documentation'),
-        CORS_ORIGIN_WHITELIST: Joi.string().default('http://localhost:3000')
+        CORS_ORIGIN_WHITELIST: Joi.string().default('http://localhost:3000'),
+        JWT_SECRET: Joi.string().required(),
+        JWT_ISSUER: Joi.string().default('nestjs-auth'),
       })
     }),
     ApiModule,
-    PrismaModule
+    PrismaModule,
+    AuthModule
   ],
   controllers: [],
   providers: [],
